@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demomap">
+
+<resultMap type="com.demo.entity.TDemo" id="baseResult">
+             <id property="id" column="id" />  
+             <result property="name" column="name" />  
+             <result property="price" column="price" />  
+             <result property="imgPath" column="img_path" />    
+             <result property="goodsDesc" column="goods_desc" /> 
+             <result property="goodsKind" column="goods_kind" />  
+               
+</resultMap>
+
+ <select id="queryDemos" parameterType="map"   resultMap="baseResult">
+
+ select*  from t_goods
+	   where 1=1
+	   <if test=" findname!=''">
+	      and name LIKE   '%'+#{findname}+'%'
+	   </if>  
+	    <if test=" goodsKind!=''">  
+		and goods_kind  =#{goodsKind}
+		</if>  		   
+	   limit #{a} , #{b} 
+	  
+	  
+ </select>
+ 
+<select id="queryDemosByUserId" parameterType="int"   resultMap="baseResult">
+  select*from t_goods where id in(
+select goods_id from  t_trolley where USER_ID=#{userId}
+)
+  </select>
+ 
+  <select id="queryDemoById" parameterType="int"   resultMap="baseResult">
+select*From t_goods where id=#{id}
+ </select>
+ 
+  <select id="queryDemoCount" parameterType="map"  resultType="int">
+select count(1) From t_goods  where 1=1
+	<if test=" findname!=''">  
+	and name LIKE '%'+#{findname}+'%'
+	</if>  
+    <if test=" goodsKind!=''">  
+	and goods_kind  =#{goodsKind}
+	</if>  	
+ </select>
+ 
+  <select id="queryDemoCountByDemoName" parameterType="map"  resultType="int">
+select count(1) From t_goods  where  
+	 name =#{findname};
+ </select> 
+  <insert id="addDemo" parameterType="com.demo.entity.TDemo">
+ insert into t_goods  values(null,#{name},#{price},#{goodsKind},#{imgPath},#{goodsDesc});
+ </insert>
+ 
+ <update id="updDemo" parameterType="com.demo.entity.TDemo">
+ update t_goods set
+ <if test="imgPath != null">
+     img_path = #{imgPath},
+ </if>
+  name=#{name} ,price=#{price} , goods_desc=#{goodsDesc}, goods_kind=#{goodsKind}
+   where id=#{id}
+ </update>
+   <select id="deleteDemoById" parameterType="int" >
+delete From t_goods where id=#{id}
+ </select> 
+
+
+</mapper>

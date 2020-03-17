@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ordermap">
+
+<resultMap type="com.demo.entity.TOrder" id="baseResult">
+             <id property="id" column="id" />  
+             <result property="userId" column="user_id" />  
+             <result property="goodsId" column="goods_id" />  
+              <result property="goodsName" column="goodsName" />  
+             <result property="imgPath" column="imgPath" />    
+             <result property="createTime" column="create_time" /> 
+             <result property="phoneNum" column="phone_num" /> 
+             <result property="qqNum" column="qq_num" />              
+             <result property="payMoney" column="pay_money" />
+             <result property="status" column="status" />  
+             <result property="reason" column="reason" />  
+             <result property="feedback" column="feedback" />  
+             <result property="buyNum" column="buy_num" />  
+             <result property="price" column="price" />  
+             
+</resultMap>
+<resultMap type="com.demo.entity.TComment" id="commentResult">
+             <id property="id" column="id" />  
+             <result property="userId" column="user_id" />  
+             <result property="loginName" column="login_name" />  
+             <result property="goodsId" column="goods_id" />  
+             <result property="comment" column="comment" />  
+             <result property="createTime" column="create_time" />  
+             
+</resultMap>
+
+  <insert id="addOrder" parameterType="com.demo.entity.TOrder">
+ insert into t_order  values(null,#{userId},#{goodsId},#{createTime},#{phoneNum},#{qqNum},#{buyNum},#{price},#{payMoney},#{status},#{reason},#{feedback});
+ </insert>
+ 
+  <select id="queryOrdersCount" parameterType="map"  resultType="int">
+    select count(1) From t_order  where 1=1  
+	<if test=" findname!=''"> 
+	and id like   '%'+#{findname}+'%'
+	or goods_id in(
+	select id from t_goods where name   LIKE '%'+#{findname}+'%'
+	)
+	</if>  
+ </select>
+ 
+ 
+ <select id="queryOrders" parameterType="map"   resultMap="baseResult">
+	  
+	   select* ,(select login_name from t_user where id=user_id)userName,
+	 (select name from t_goods where id=goods_id)goodsName,
+	 	 (select img_path from t_goods where id=goods_id)imgPath from t_order
+	   where 1=1
+	  <if test=" findname!=''"> 
+	and id like   '%'+#{findname}+'%'
+	or goods_id in(
+	select id from t_goods where name   LIKE '%'+#{findname}+'%'
+	)
+	  </if> 
+	   limit #{a} , #{b} 
+ </select> 
+ 
+<select id="queryMyOrdersCount" parameterType="map"  resultType="int">
+    select count(1) From t_order  where user_id =#{userId}
+	<if test=" findname!=''"> 
+		and id like   '%'+#{findname}+'%'
+	or goods_id in(
+	select id from t_goods where name   LIKE '%'+#{findname}+'%'
+	)
+	</if>  
+ </select>
+ 
+  
+ <select id="queryMyOrders" parameterType="map"   resultMap="baseResult">
+  
+	    select*,
+	     (select name from t_goods where id=goods_id)goodsName,
+	 	 (select img_path from t_goods where id=goods_id)imgPath from t_order
+	   where user_id=#{userId}
+	  <if test=" findname!=''"> 
+	  	and id like   '%'+#{findname}+'%'
+	or goods_id in(
+	select id from t_goods where name   LIKE '%'+#{findname}+'%'
+	)
+	</if> 
+	     limit #{a} , #{b} 
+ </select> 
+ <insert id="addTrolley" parameterType="map" >
+   insert t_trolley values(null,#{userId},#{goodsId})
+ </insert>
+ <delete id="delTrolley" parameterType="map">
+ delete from t_trolley where user_id=#{userId}  and goods_id=#{goodsId}
+ </delete>
+ <delete id="delAllTrolley" parameterType="int">
+ delete from t_trolley where user_id=#{userId}  
+ </delete> 
+ <select id="selectGoodsIdsByUserId" parameterType="int" resultType="int">
+ select goods_id from t_trolley where user_id=#{userId}  
+ </select>
+<select id="getOrderById" parameterType="int" resultMap="baseResult">
+select*from t_order where id=#{orderId}
+</select>
+<update id="updOrderById"  parameterType="com.demo.entity.TOrder">
+update t_order set qq_num =#{qqNum} ,phone_num=#{phoneNum},price=#{price},buy_num=#{buyNum},pay_money=#{payMoney} where id=#{id}
+</update>
+<delete id="delOrderById" parameterType="int">
+delete from t_order where id=#{orderId}
+</delete>
+<update id="setReasonByOrderId" parameterType="map">
+update t_order set reason=#{reason} ,status=#{status} where id=#{orderId}
+</update>
+<update id="setFeedbackByOrderId" parameterType="map">
+update t_order set feedback=#{feedback} ,status=#{status} where id=#{orderId}
+</update>
+<update id="setStatusByOrderId" parameterType="map">
+update t_order set status=#{status} where id=#{orderId}
+</update>
+
+
+
+<insert id="addComment" parameterType="com.demo.entity.TComment">
+insert t_comment values(null,#{userId},#{goodsId},#{comment},#{createTime})
+</insert>
+<select id="getCommentCountByGoodsId" parameterType="int" resultType="int">
+select count(1) from t_comment where goods_id=#{goodsId}
+</select>
+<select resultMap="commentResult" id="getCommentByGoodsId" parameterType="map">
+
+
+select  t1.*,t3.login_name from t_comment t1 ,t_user t3 where t1.user_id=t3.id
+  and t1.goods_id=#{goodsId}  
+ limit #{a} , #{b} 
+	    order by create_time desc
+</select>
+<delete id="delCommentById" parameterType="int">
+delete from t_comment where id=#{id}
+</delete>
+
+
+</mapper>

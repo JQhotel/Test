@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"  
+    xmlns:tx="http://www.springframework.org/schema/tx"   
+    xmlns:aop="http://www.springframework.org/schema/aop"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                        http://www.springframework.org/schema/beans/spring-beans.xsd  
+                        http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context-4.3.xsd  
+                        http://www.springframework.org/schema/tx  
+                        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd  
+                        http://www.springframework.org/schema/aop 
+                        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+                        http://www.springframework.org/schema/mvc 
+                		http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd"> 
+	
+    <!-- 开启注解 -->
+	<context:annotation-config/>   
+        
+    <!-- 扫描包设置 -->
+	<context:component-scan base-package="com.demo.*"/> 
+	
+
+	
+	
+   <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" > 
+       <property name="driverClassName">
+   			<value>com.mysql.cj.jdbc.Driver</value>
+   		</property>
+   		<property name="url">
+   			<value>jdbc:mysql://127.0.0.1:3306/game?serverTimezone=UTC&amp;useSSL=false</value>
+   		</property>
+   		<property name="username">
+   			<value>root</value>
+   		</property>
+   		<property name="password">
+   			<value>123456</value>
+   		</property>
+        
+    </bean>
+
+	
+	    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+        <property name="dataSource" ref="dataSource" />  
+        <!-- 自动扫描mapping.xml文件 -->
+        <!-- 自动扫描mapping.xml文件 -->
+        <property name="mapperLocations" value="classpath:com/demo/mapper/*.xml"></property>  
+    </bean> 
+	
+
+	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+        <property name="basePackage" value="com.demo.entity" />  
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>  
+    </bean>
+	
+	<!-- 配置事务 -->
+
+	
+	<!-- tx:advice和 切点的替代法-注解-->    <!--proxy-target-class="true"  实现类形式 .       false :接口形式-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>  
+	<!-- 定义事务管理器 -->    
+    <bean id="transactionManager"  
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        <property name="dataSource" ref="dataSource" />  
+    </bean>
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	    <!-- 设定默认编码 -->
+	    <property name="defaultEncoding" value="UTF-8"></property>
+	    <!-- 设定文件上传的最大值为5MB，5*1024*1024 -->
+	    <property name="maxUploadSize" value="5242880"></property>
+	    <!-- 设定文件上传时写入内存的最大值，如果小于这个参数不会生成临时文件，默认为10240 -->
+	    <property name="maxInMemorySize" value="40960"></property>
+	    <!-- 上传文件的临时路径 -->
+	    <property name="uploadTempDir" value="fileUpload/temp"></property>
+	    <!-- 延迟文件解析 -->
+	    <property name="resolveLazily" value="true"/>
+	</bean>	
+
+</beans>
